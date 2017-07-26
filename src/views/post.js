@@ -1,10 +1,10 @@
-var html = require('bel')
+var html = require('choo/html')
 
-function homView (params, store) {
-  var post = store.getState().posts.filter(function (p) {
-    return p.id === params.post
+function homView (state) {
+  var post = state.posts.filter(function (p) {
+    return p.id === state.params.post
   })[0]
-  return html`<article class="helvetica cf ph3 ph5-ns pv5">
+  return html`<div class="helvetica cf ph3 ph5-ns pv5">
   <header class="fn fl-ns w-50-ns pr4-ns">
     <h1 class="f2 lh-title fw9 mb3 mt0 pt3 bt bw2">
       ${post.title}
@@ -19,6 +19,6 @@ function homView (params, store) {
       ${post.content}
     </p>
   </div>
-</article>`
+</div>`
 }
 module.exports = homView

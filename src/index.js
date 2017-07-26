@@ -1,38 +1,62 @@
-var Router = require('singleton-router')
 var css = require('sheetify')
-var html = require('bel')
-var nanomorph = require('nanomorph')
-var createStore = require('redux').createStore
-var reducer = require('./store/reducer')
+var choo = require('choo')
+var http = require('http')
+var cookie = require('cookie-cutter')
 var homeView = require('./views/home')
 var postView = require('./views/post')
 var newPostView = require('./views/new-post')
-var getAllPosts = require('./store/actions').getAllPosts
 
 css('tachyons')
 
-var router = Router()
-var store = createStore(reducer)
-store.subscribe(render)
+// initialize choo
+var app = choo()
 
-router.setStore(store)
-router.addRoute('/', homeView)
-router.addRoute('/new', newPostView)
-router.addRoute('/:post', postView)
-router.notFound(notFoundView)
-router.setRoot('/')
-router.start()
+app.use(function (state, emitter) {
+  state.router = window.RouterInstance
+  state.posts = []
+  emitter.on('addPost', function (post) {
+    makeRequest('POST', '/api/v1/post', post, function (body, res) {
+      state.posts.push(body.data)
+      emitter.emit(state.events.PUSHSTATE, '/')
+    })
+  })
+})
 
-getAllPosts(store)
-function notFoundView (params, state) {
-  return html`<main>
-    <h1>ups! nothing here :(</h1>
-  </main>`
-}
+app.route('/', homeView)
+app.route('/new', newPostView)
+app.route('/:post', postView)
 
-function render (prev, curr) {
-  var _prev = router.rootEl.lasttElementChild || router.rootEl.lastChild
-  var _curr = router.currentRoute.onStart(store)
-  console.log('updated state to: ' + JSON.stringify(store.getState()))
-  nanomorph(_prev, _curr)
+// start app
+var tree = app.start()
+document.body.appendChild(tree)
+
+function makeRequest (method, route, data, cb) {
+  var headers = {'Content-Type': 'application/json'}
+  if (cookie.get('token')) headers = Object.assign(headers, {'x-session-token': cookie.get('token')})
+  var req = http.request({ method: method, path: route, headers: headers }, function (res) {
+    if (res.headers && res.headers['x-session-token']) {
+      if (res.headers['timeout']) {
+        cookie.set('token', res.headers['x-session-token'], { expires: res.headers['timeout'] })
+      } else {
+        cookie.set('token', res.headers['x-session-token'])
+      }
+    }
+    res.on('error', function (err) {
+      // t.error(err)
+      throw err
+    })
+    var body = []
+    res.on('data', function (chunk) {
+      body.push(chunk)
+    })
+    res.on('end', function () { cb(JSON.parse(body.toString()), res) })
+  })
+  req.on('error', function (err) {
+    // t.error(err)
+    throw err
+  })
+  if (data) {
+    req.write(JSON.stringify(data))
+  }
+  req.end()
 }

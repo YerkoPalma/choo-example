@@ -1,10 +1,10 @@
-var html = require('bel')
+var html = require('choo/html')
 
-function homView (params, store) {
-  var posts = store.getState().posts || []
-  return html`<section class="mw7 center avenir">
+function homView (state) {
+  var posts = state.posts || []
+  return html`<div class="mw7 center avenir">
   <h2 class="baskerville fw1 ph3 ph0-l">News 
-    <a data-route="/new" class="pointer f5 no-underline black bg-animate hover-bg-black hover-white inline-flex items-center pa3 ba border-box">
+    <a href="/new" class="pointer f5 no-underline black bg-animate hover-bg-black hover-white inline-flex items-center pa3 ba border-box">
       <span class="pr1">Add post</span>
       <svg class="w1" data-icon="chevronRight" viewBox="0 0 32 32" style="fill:currentcolor">
         <title>chevronRight icon</title>
@@ -15,7 +15,7 @@ function homView (params, store) {
   ${posts.length === 0 ? 'No posts yet' : ''}
   ${posts.map(function (post) {
     return html`<article class="bt bb b--black-10">
-    <a class="db pv4 ph3 ph0-l no-underline black dim pointer" data-route="/${post.id}">
+    <a class="db pv4 ph3 ph0-l no-underline black dim pointer" href="/${post.id}">
       <div class="flex flex-column flex-row-ns">
         <div class="w-100 pl3-ns">
           <h1 class="f3 fw1 baskerville mt0 lh-title">${post.title}</h1>
@@ -28,6 +28,6 @@ function homView (params, store) {
     </a>
   </article>`
   })}
-</section>`
+</div>`
 }
 module.exports = homView

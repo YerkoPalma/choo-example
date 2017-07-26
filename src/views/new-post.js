@@ -1,8 +1,8 @@
-var html = require('bel')
-var addPost = require('../store/actions').addPost
+var html = require('choo/html')
+// var addPost = require('../store/actions').addPost
 
-function homView (params, store) {
-  return html`<section class="mw7 center avenir">
+function homView (state, emit) {
+  return html`<div class="mw7 center avenir">
     <form class="pa4 black-80" onsubmit="${function (e) {
       e.preventDefault()
       var post = {
@@ -11,9 +11,7 @@ function homView (params, store) {
         content: document.getElementById('content').value,
         date: Date.now().toLocaleString()
       }
-      addPost(store, post, function () {
-        window.RouterInstance.goToPath('/')
-      })
+      emit('addPost', post)
     }}">
     <div class="center measure-wide">
       <label for="title" class="f6 b db mb2">Title</label>
@@ -33,6 +31,6 @@ function homView (params, store) {
       <input class="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib" type="submit" value="Submit">
     </div>
   </form>
-</section>`
+</div>`
 }
 module.exports = homView
