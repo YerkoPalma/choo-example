@@ -3,5 +3,13 @@
 
 > Full stack example with choo front-end
 
+## What's this?
+
+This is the same app from [simple-example][simple-example], but with 
+[choo][choo] front end.
+
 ## License
 [MIT](/license)
+
+[choo]: https://github.com/choojs/choo
+[simple-example]: https://github.com/YerkoPalma/simple-example
